@@ -11,14 +11,14 @@ PATHCMDSERVER := $(PATHCMD)/server
 PATHBUILD := $(CURDIR)/build
 PATHDOCKERCOMPOSE := $(CURDIR)/build/docker-compose.yml
 
-PATHAPIPROTO := $(CURDIR)/api/pb/api.proto
+PATHAPIPROTO := ./api/pb/api.proto
 
-PATHADAPTERMOCK := $(CURDIR)/pkg/adapter/mock
+PATHADAPTERMOCK := ./pkg/adapter/mock
 
 TESTTAGUNIT := -tags=unit
 TESTTAGINTEGRATION := -tags=integration
 
-default: build
+default: generate test
 
 generate-grpc:
 	protoc --go_out=plugins=grpc:. $(PATHAPIPROTO)
@@ -26,21 +26,24 @@ generate-grpc:
 generate-mocks:
 	go generate $(PATHADAPTERMOCK)
 
-test-unit:
+test-unit: generate
 	go test $(TESTTAGUNIT) -race ./...
 
-test-integration:
+test-integration: generate
 	@echo For integration testing redis must be accessable on 0.0.0.0:6379
 	go test $(TESTTAGINTEGRATION) -race ./...
 
-build-server:
+build-server: generate
 	CGO_ENABLED=0 go build -o $(PATHDISTSERVER) $(PATHCMDSERVER)
 
-build-client:
+build-client: generate
 	CGO_ENABLED=0 go build -o $(PATHDISTCLIENT) $(PATHCMDCLIENT)
 
 dc-up:
 	docker-compose -f $(PATHDOCKERCOMPOSE) up
+
+redis:
+	docker run -p6379:6379 -d redis
 
 generate: generate-grpc generate-mocks
 

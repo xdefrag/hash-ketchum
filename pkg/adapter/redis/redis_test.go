@@ -54,6 +54,10 @@ func TestRedis_Store(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if err := r.Store(tt.args.ctx, tt.args.hash); (err != nil) != tt.wantErr {
+				t.Errorf("Redis.Store() error = %v, wantErr %v", err, tt.wantErr)
+			}
+
 			isDataInRedis, err := tt.isDataInRedis()
 			if err != nil {
 				t.Fatalf("Redis error: %s", err)
@@ -61,10 +65,6 @@ func TestRedis_Store(t *testing.T) {
 
 			if !isDataInRedis {
 				t.Errorf("Redis.Store() data is not saved to redis")
-			}
-
-			if err := r.Store(tt.args.ctx, tt.args.hash); (err != nil) != tt.wantErr {
-				t.Errorf("Redis.Store() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
