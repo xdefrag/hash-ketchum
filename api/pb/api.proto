@@ -1,0 +1,16 @@
+syntax = "proto3";
+
+package pb;
+
+service HashKetchum {
+  rpc Submit (HashRequest) returns (HashResponse);
+}
+
+message HashRequest {
+  string hash = 1;
+}
+
+message HashResponse {
+  string result = 1;
+  string error = 2;
+}
